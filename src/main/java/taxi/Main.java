@@ -1,5 +1,6 @@
 package taxi;
 
+import org.apache.spark.Accumulator;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
@@ -56,7 +57,8 @@ public class Main {
                 .mapToPair(Tuple2::swap);
 
 
-        JavaPairRDD<String, String> driversDataRdd = sc.textFile("data/taxi/drivers.txt").mapToPair(line -> {
+        JavaPairRDD<String, String> driversDataRdd = sc.textFile("data/taxi/drivers.txt").
+                mapToPair(line -> {
                     String[] split = line.split(",");
                     return new Tuple2<>(split[0], split[1]);
                 }
@@ -66,6 +68,19 @@ public class Main {
         sc.parallelizePairs(sortedDriversByKm.take(3)).
                 join(driversDataRdd).take(3).forEach(System.out::println);
 //        sortedDriversByKm.join(driversDataRdd).take(3).forEach(System.out::println);
+
+        Accumulator<Integer> smallTrips = sc.accumulator(0, "smallTrips");
+        Accumulator<Integer> bigTrips = sc.accumulator(0, "bigTrips");
+
+
+        trips.foreach(trip -> {
+            if (trip.getKm() > 10) {
+                bigTrips.add(1);
+            }else {
+                smallTrips.add(1);
+            }
+        });
+        Integer value = bigTrips.value();
 
         System.out.println("winners");
 
