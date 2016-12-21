@@ -1,6 +1,7 @@
 package taxi;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -10,6 +11,7 @@ import java.io.Serializable;
  */
 @Data
 @AllArgsConstructor
+@Builder
 public class Trip implements Serializable{
     private String id;
     private int km;
@@ -17,7 +19,7 @@ public class Trip implements Serializable{
 
     public static Trip convertLineToTrip(String line) {
         String[] words = line.split(" ");
-        return new Trip(words[0], Integer.parseInt(words[2]), words[1]);
+        return Trip.builder().id(words[0]).city(words[1]).km(Integer.parseInt(words[2])).build();
     }
 
     public boolean bostonFilter() {

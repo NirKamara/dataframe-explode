@@ -24,7 +24,7 @@ public class Main {
         System.out.println("end of trip object");
 
         System.out.println("trips to boston");
-        trips.filter(trip->trip.getCity().equals("boston"))
+        trips.filter(trip -> trip.getCity().equals("boston"))
                 .collect().forEach(System.out::println);
         System.out.println("end trips to boston");
 
@@ -46,17 +46,46 @@ public class Main {
                 .map(Trip::getKm).reduce(Integer::sum);
         System.out.println("allKm = " + allKm);
 
-        System.out.println("drivers km");
+        System.out.println("winners");
 
         JavaPairRDD<String, Integer> id2KmRdd =
                 trips.mapToPair(trip -> new Tuple2<>(trip.getId(), trip.getKm()));
-        id2KmRdd.reduceByKey(Integer::sum)
+        JavaPairRDD<String, Integer> sortedDriversByKm = id2KmRdd.reduceByKey(Integer::sum)
                 .mapToPair(Tuple2::swap)
                 .sortByKey(false)
-                .mapToPair(Tuple2::swap)
-                .collect().forEach(System.out::println);
-        System.out.println("end drivers km");
+                .mapToPair(Tuple2::swap);
+
+
+        JavaPairRDD<String, String> driversDataRdd = sc.textFile("data/taxi/drivers.txt").mapToPair(line -> {
+                    String[] split = line.split(",");
+                    return new Tuple2<>(split[0], split[1]);
+                }
+        );
+
+        sortedDriversByKm.collect().forEach(System.out::println);
+        sc.parallelizePairs(sortedDriversByKm.take(3)).
+                join(driversDataRdd).take(3).forEach(System.out::println);
+//        sortedDriversByKm.join(driversDataRdd).take(3).forEach(System.out::println);
+
+        System.out.println("winners");
 
 
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
