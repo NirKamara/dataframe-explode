@@ -2,10 +2,12 @@ package popularWords;
 
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.api.java.JavaSparkContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import scala.Tuple2;
 
+import javax.annotation.PostConstruct;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +19,6 @@ import java.util.List;
 public class TopXWordsService implements Serializable {
     @Autowired
     private UserConfig userConfig;
-
 
 
     public List<String> topX(JavaRDD<String> rdd, int topX) {
